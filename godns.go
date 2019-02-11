@@ -19,6 +19,7 @@ type LookupOptions struct {
 	Net         string   //Default:udp
 	OnlyIPv4    bool
 	DialTimeout func(net, addr string, timeout time.Duration) (net.Conn, error)
+	UseHosts bool
 }
 
 type dnsCache struct {
@@ -124,7 +125,10 @@ func LookupIP(name string, options *LookupOptions) (addrs []net.IP, err error) {
 		return net.LookupIP(name)
 	}
 
-	haddrs := lookupStaticHost(name)
+	haddrs := []string{}
+	if options.UseHosts {
+		haddrs = lookupStaticHost(name)
+	}
 	if len(haddrs) > 0 {
 		for _, haddr := range haddrs {
 			if ip := net.ParseIP(haddr); ip != nil {
